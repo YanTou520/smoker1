@@ -6,7 +6,7 @@
     <title>名片 | 烟头</title>
     <!-- 引入Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- 引入Font Awesome (使用阿里云CDN，提高本地访问稳定性) -->
+    <!-- 引入Font Awesome -->
     <link href="https://cdn.staticfile.org/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <!-- 配置Tailwind自定义颜色和字体 -->
     <script>
@@ -90,43 +90,29 @@
         <div class="w-16 h-16 border-4 border-accent border-t-transparent rounded-full animate-spin"></div>
     </div>
 
-    <!-- QQ联系提示弹窗 -->
+    <!-- 备用提示弹窗 -->
     <div id="qqModal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
         <div class="modal-backdrop absolute inset-0 bg-black/60"></div>
         <div class="bg-gray-800 rounded-xl p-6 max-w-md w-full mx-4 relative z-10 transform transition-all">
             <h3 class="text-xl font-semibold mb-4 flex items-center">
-                <i class="fa fa-qq text-accent mr-2"></i>
-                <span id="modalTitle">添加好友一起玩</span>
+                <i class="fa fa-qq text-accent mr-2"></i>操作提示
             </h3>
             
-            <!-- 动态消息内容 -->
-            <div id="messageContainer" class="hidden mb-4 p-3 bg-gray-700 rounded-lg">
-                <p class="text-gray-300">将发送消息：</p>
-                <p class="font-medium text-white" id="messageContent"></p>
-            </div>
-            
             <div class="space-y-4 mb-6">
-                <!-- 主要操作按钮：尝试直接打开QQ -->
-                <button id="openQQBtn" class="w-full py-3 bg-accent text-white rounded-lg font-medium btn-hover flex items-center justify-center">
-                    <i class="fa fa-external-link mr-2"></i>
-                    打开QQ发送消息
-                </button>
-                
-                <div class="text-gray-400 text-sm">
-                    <p>如果无法打开，请使用备用方式：</p>
-                    <div class="flex items-center mt-2 p-2 bg-gray-700 rounded-lg">
-                        <span class="mr-3 w-20">QQ号码：</span>
-                        <span class="flex-1 font-medium" id="qqNumber">3272927512</span>
-                        <button onclick="copyQQNumber()" class="text-accent hover:text-accent/80 transition-colors">
-                            <i class="fa fa-copy"></i> 复制
-                        </button>
-                    </div>
+                <p class="text-gray-300">由于浏览器安全限制，无法直接打开QQ。</p>
+                <div class="flex items-center p-3 bg-gray-700 rounded-lg">
+                    <span class="mr-3 w-20">QQ号码：</span>
+                    <span class="flex-1 font-medium" id="qqNumber">3272927512</span>
+                    <button onclick="copyQQNumber()" class="text-accent hover:text-accent/80 transition-colors">
+                        <i class="fa fa-copy"></i> 复制
+                    </button>
                 </div>
+                <p class="text-gray-400 text-sm">请手动打开QQ，搜索号码添加好友或发送消息。</p>
             </div>
             
             <div class="text-center">
-                <button onclick="closeModal()" class="px-6 py-2 bg-gray-700 text-white rounded-lg btn-hover">
-                    取消
+                <button onclick="closeModal()" class="px-6 py-2 bg-accent text-white rounded-lg btn-hover">
+                    知道了
                 </button>
             </div>
         </div>
@@ -146,7 +132,7 @@
             <!-- 左侧：头像和基本信息 -->
             <section class="md:col-span-1 animate-fade-in delay-100">
                 <div class="bg-gray-800 rounded-xl overflow-hidden shadow-lg card-hover">
-                    <!-- 头像 - 使用最新指定的图片链接 -->
+                    <!-- 头像 -->
                     <div class="relative">
                         <img src="https://tse4-mm.cn.bing.net/th/id/OIP-C.-aPEYbMSBUohi47eAx3XCgHaE6?w=300&h=188&c=7&r=0&o=5&dpr=1.3&pid=1.7" alt="烟头的头像" class="w-full aspect-square object-cover">
                         <div class="absolute inset-0 bg-gradient-to-t from-gray-800 to-transparent opacity-60"></div>
@@ -171,11 +157,11 @@
                             </li>
                         </ul>
                         
-                        <!-- 社交媒体 - QQ图标 -->
+                        <!-- 社交媒体 - QQ图标点击跳转到添加好友页面 -->
                         <div class="mt-6">
                             <h3 class="text-lg font-medium mb-3">社交媒体</h3>
                             <div class="flex space-x-4">
-                                <button onclick="openModal('')" 
+                                <button onclick="openAddFriendPage()" 
                                    class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center btn-hover cursor-pointer" 
                                    aria-label="添加QQ好友：3272927512">
                                     <i class="fa fa-qq"></i>
@@ -220,7 +206,7 @@
                                         <span>我的世界</span>
                                         <span>
                                             99%
-                                            <button onclick="openModal('来玩MC')" class="ml-1 text-accent hover:underline cursor-pointer">
+                                            <button onclick="sendGameMessage('来玩我的世界')" class="ml-1 text-accent hover:underline cursor-pointer">
                                                 <i class="fa fa-comment"></i>
                                             </button>
                                         </span>
@@ -234,7 +220,7 @@
                                         <span>Apex</span>
                                         <span>
                                             60%
-                                            <button onclick="openModal('来玩Apex')" class="ml-1 text-accent hover:underline cursor-pointer">
+                                            <button onclick="sendGameMessage('来玩Apex')" class="ml-1 text-accent hover:underline cursor-pointer">
                                                 <i class="fa fa-comment"></i>
                                             </button>
                                         </span>
@@ -248,7 +234,7 @@
                                         <span>求生之路2</span>
                                         <span>
                                             70%
-                                            <button onclick="openModal('来玩求2')" class="ml-1 text-accent hover:underline cursor-pointer">
+                                            <button onclick="sendGameMessage('来玩求生之路2')" class="ml-1 text-accent hover:underline cursor-pointer">
                                                 <i class="fa fa-comment"></i>
                                             </button>
                                         </span>
@@ -269,7 +255,7 @@
                                         <span>守望先锋</span>
                                         <span>
                                             40%
-                                            <button onclick="openModal('来玩守望先锋')" class="ml-1 text-accent hover:underline cursor-pointer">
+                                            <button onclick="sendGameMessage('来玩守望先锋')" class="ml-1 text-accent hover:underline cursor-pointer">
                                                 <i class="fa fa-comment"></i>
                                             </button>
                                         </span>
@@ -283,7 +269,7 @@
                                         <span>PUBG</span>
                                         <span>
                                             15%
-                                            <button onclick="openModal('来玩PUBG')" class="ml-1 text-accent hover:underline cursor-pointer">
+                                            <button onclick="sendGameMessage('来玩PUBG')" class="ml-1 text-accent hover:underline cursor-pointer">
                                                 <i class="fa fa-comment"></i>
                                             </button>
                                         </span>
@@ -297,7 +283,7 @@
                                         <span>逃生：试炼</span>
                                         <span>
                                             30%
-                                            <button onclick="openModal('来玩逃生试炼')" class="ml-1 text-accent hover:underline cursor-pointer">
+                                            <button onclick="sendGameMessage('来玩逃生：试炼')" class="ml-1 text-accent hover:underline cursor-pointer">
                                                 <i class="fa fa-comment"></i>
                                             </button>
                                         </span>
@@ -323,21 +309,21 @@
                     <div class="space-y-6">
                         <div class="relative pl-6 border-l-2 border-gray-700 before:absolute before:left-[-9px] before:top-0 before:w-4 before:h-4 before:rounded-full before:bg-accent">
                             <h3 class="text-lg font-medium">服务器管理员 | 我的世界社区</h3>
-                            <p class="text-gray-400 mb-2">2007年 - 至今</p>
-                            <p class="text-gray-300">不负责游戏服务器日常维护，创建友好游戏环境，解决玩家问题，组织线上活动。</p>
+                            <p class="text-gray-400 mb-2">2020年 - 至今</p>
+                            <p class="text-gray-300">负责游戏服务器日常维护，创建友好游戏环境，解决玩家问题，组织线上活动。</p>
                         </div>
                         
                         <div class="relative pl-6 border-l-2 border-gray-700 before:absolute before:left-[-9px] before:top-0 before:w-4 before:h-4 before:rounded-full before:bg-accent">
-                            <h3 class="text-lg font-medium">游戏私宅 | 游戏论坛</h3>
-                            <p class="text-gray-400 mb-2">2007年 - 2025年</p>
-                            <p class="text-gray-300">参与多款游戏测试，未写测评报告，未提供游戏体验优化建议。</p>
+                            <h3 class="text-lg font-medium">游戏测评员 | 游戏论坛</h3>
+                            <p class="text-gray-400 mb-2">2018年 - 2020年</p>
+                            <p class="text-gray-300">参与多款游戏测试，撰写测评报告，提供游戏体验优化建议。</p>
                         </div>
                     </div>
                 </div>
                 
-                <!-- 邀请按钮 -->
+                <!-- 邀请按钮 - 点击跳转到添加好友页面 -->
                 <div class="text-center animate-fade-in delay-300">
-                    <button onclick="openModal('来玩游戏')" class="inline-flex items-center px-6 py-3 bg-accent text-white rounded-lg font-medium btn-hover cursor-pointer">
+                    <button onclick="openAddFriendPage()" class="inline-flex items-center px-6 py-3 bg-accent text-white rounded-lg font-medium btn-hover cursor-pointer">
                         <i class="fa fa-gamepad mr-2"></i>
                         邀请一起玩游戏
                     </button>
@@ -354,36 +340,44 @@
 
     <!-- JavaScript -->
     <script>
-        // 全局变量存储QQ号码和要发送的消息
+        // 全局变量存储QQ号码
         const qqNumber = "3272927512";
-        let messageToSend = "";
+        
+        // 打开添加好友页面
+        function openAddFriendPage() {
+            // 腾讯官方添加好友链接
+            const addFriendUrl = `https://wpa.qq.com/msgrd?v=3&uin=${qqNumber}&site=qq&menu=yes&action=addfriend`;
+            
+            // 尝试打开链接
+            window.open(addFriendUrl, '_blank');
+            
+            // 延迟检查并显示备用方案
+            setTimeout(() => {
+                openModal();
+            }, 1500);
+        }
+        
+        // 发送游戏邀请消息
+        function sendGameMessage(message) {
+            // 对消息进行编码
+            const encodedMsg = encodeURIComponent(message);
+            // 腾讯官方发送消息链接
+            const sendMessageUrl = `https://wpa.qq.com/msgrd?v=3&uin=${qqNumber}&site=qq&menu=yes&msg=${encodedMsg}`;
+            
+            // 尝试打开链接
+            window.open(sendMessageUrl, '_blank');
+            
+            // 延迟检查并显示备用方案
+            setTimeout(() => {
+                openModal(message);
+            }, 1500);
+        }
         
         // 打开提示弹窗
-        function openModal(message = "") {
-            messageToSend = message;
-            const modal = document.getElementById('qqModal');
-            const modalTitle = document.getElementById('modalTitle');
-            const messageContainer = document.getElementById('messageContainer');
-            const messageContent = document.getElementById('messageContent');
-            const openQQBtn = document.getElementById('openQQBtn');
-            
-            // 根据是否有消息设置弹窗内容
-            if (message) {
-                modalTitle.textContent = "发送游戏邀请";
-                messageContent.textContent = message;
-                messageContainer.classList.remove('hidden');
-                // 设置直接打开QQ的链接（带消息）
-                openQQBtn.onclick = () => openQQWithMessage();
-            } else {
-                modalTitle.textContent = "添加QQ好友";
-                messageContainer.classList.add('hidden');
-                // 设置直接打开QQ的链接（纯添加好友）
-                openQQBtn.onclick = () => openQQAddFriend();
-            }
-            
-            // 显示弹窗
-            modal.classList.remove('hidden');
-            modal.classList.add('animate-fade-in');
+        function openModal(remark = "一起玩游戏") {
+            document.getElementById('remarkText')?.textContent || '';
+            document.getElementById('qqModal').classList.remove('hidden');
+            document.getElementById('qqModal').classList.add('animate-fade-in');
         }
         
         // 关闭提示弹窗
@@ -401,24 +395,6 @@
             });
         }
         
-        // 打开QQ添加好友
-        function openQQAddFriend() {
-            const url = `tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=${qqNumber}&website=www.oicqzone.com`;
-            window.location.href = url;
-            // 2秒后自动关闭弹窗（给浏览器足够时间处理跳转）
-            setTimeout(closeModal, 2000);
-        }
-        
-        // 打开QQ并发送指定消息
-        function openQQWithMessage() {
-            // 对消息进行编码，避免特殊字符问题
-            const encodedMsg = encodeURIComponent(messageToSend);
-            const url = `tencent://message/?uin=${qqNumber}&Site=&Menu=yes&Msg=${encodedMsg}`;
-            window.location.href = url;
-            // 2秒后自动关闭弹窗
-            setTimeout(closeModal, 2000);
-        }
-        
         // 页面加载动画
         window.addEventListener('load', function() {
             setTimeout(function() {
@@ -434,19 +410,6 @@
         
         // 滚动动画
         document.addEventListener('DOMContentLoaded', function() {
-            // 平滑滚动
-            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-                anchor.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const targetId = this.getAttribute('href');
-                    if (targetId !== '#') {
-                        document.querySelector(targetId).scrollIntoView({
-                            behavior: 'smooth'
-                        });
-                    }
-                });
-            });
-            
             // 监听滚动，为进入视口的元素添加动画
             const observerOptions = {
                 root: null,
@@ -463,7 +426,7 @@
                 });
             }, observerOptions);
             
-            // 观察所有带有特定类的元素
+            // 观察所有卡片元素
             document.querySelectorAll('.card-hover').forEach(card => {
                 observer.observe(card);
             });
@@ -471,3 +434,4 @@
     </script>
 </body>
 </html>
+    
