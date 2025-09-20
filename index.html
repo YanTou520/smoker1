@@ -16,7 +16,10 @@
                     colors: {
                         dark: '#2A2A2A',
                         light: '#F8F8F8',
-                        accent: '#3B82F6'
+                        accent: '#3B82F6',
+                        success: '#36d399',
+                        warning: '#fbbd23',
+                        danger: '#f87272'
                     },
                     fontFamily: {
                         sans: ['Inter', 'system-ui', 'sans-serif'],
@@ -39,6 +42,9 @@
             }
             .btn-hover {
                 @apply transition-all duration-300 hover:scale-105 hover:shadow-lg;
+            }
+            .step-active {
+                @apply bg-accent text-white border-accent;
             }
         }
     </style>
@@ -90,31 +96,145 @@
         <div class="w-16 h-16 border-4 border-accent border-t-transparent rounded-full animate-spin"></div>
     </div>
 
-    <!-- 备用提示弹窗 -->
-    <div id="qqModal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
-        <div class="modal-backdrop absolute inset-0 bg-black/60"></div>
-        <div class="bg-gray-800 rounded-xl p-6 max-w-md w-full mx-4 relative z-10 transform transition-all">
-            <h3 class="text-xl font-semibold mb-4 flex items-center">
-                <i class="fa fa-qq text-accent mr-2"></i>操作提示
-            </h3>
-            
-            <div class="space-y-4 mb-6">
-                <p class="text-gray-300">由于浏览器安全限制，无法直接打开QQ。</p>
-                <div class="flex items-center p-3 bg-gray-700 rounded-lg">
-                    <span class="mr-3 w-20">QQ号码：</span>
-                    <span class="flex-1 font-medium" id="qqNumber">3272927512</span>
-                    <button onclick="copyQQNumber()" class="text-accent hover:text-accent/80 transition-colors">
-                        <i class="fa fa-copy"></i> 复制
-                    </button>
-                </div>
-                <p class="text-gray-400 text-sm">请手动打开QQ，搜索号码添加好友或发送消息。</p>
-            </div>
-            
-            <div class="text-center">
-                <button onclick="closeModal()" class="px-6 py-2 bg-accent text-white rounded-lg btn-hover">
-                    知道了
+    <!-- 联系弹窗 -->
+    <div id="contactModal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+        <div class="modal-backdrop absolute inset-0 bg-black/60" onclick="closeContactModal()"></div>
+        <div class="bg-gray-800 rounded-xl p-6 max-w-2xl w-full mx-4 relative z-10 transform transition-all max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-semibold flex items-center">
+                    <i class="fa fa-qq text-accent mr-2"></i>联系信息与帮助
+                </h3>
+                <button onclick="closeContactModal()" class="text-gray-400 hover:text-white transition-colors">
+                    <i class="fa fa-times text-xl"></i>
                 </button>
             </div>
+            
+            <!-- 主要联系方式卡片 -->
+            <div class="bg-gray-900 rounded-lg p-5 mb-6">
+                <div class="flex flex-col md:flex-row items-center gap-6">
+                    <!-- QQ信息 -->
+                    <div class="flex-shrink-0 text-center md:text-left">
+                        <div class="w-20 h-20 bg-accent/10 rounded-full flex items-center justify-center mx-auto md:mx-0 mb-3">
+                            <i class="fa fa-qq text-3xl text-accent"></i>
+                        </div>
+                        <h4 class="text-lg font-semibold mb-1">QQ联系</h4>
+                        <p class="text-gray-300">3272927512</p>
+                    </div>
+                    
+                    <!-- 操作按钮组 -->
+                    <div class="flex-grow w-full">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <!-- 快速会话按钮 -->
+                            <button onclick="tryQuickChat()" 
+                                    class="flex items-center justify-center gap-2 px-4 py-2 bg-accent text-white rounded-lg hover:bg-accent/90 transition-all btn-hover">
+                                <i class="fa fa-comments"></i>
+                                <span>快速发起会话</span>
+                            </button>
+                            
+                            <!-- 添加好友按钮 -->
+                            <button onclick="tryAddFriend()" 
+                                    class="flex items-center justify-center gap-2 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-all btn-hover">
+                                <i class="fa fa-user-plus"></i>
+                                <span>添加好友</span>
+                            </button>
+                            
+                            <!-- 复制QQ号按钮 -->
+                            <button onclick="copyQQNumber()" 
+                                    class="flex items-center justify-center gap-2 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-all btn-hover col-span-1 sm:col-span-2">
+                                <i class="fa fa-copy"></i>
+                                <span>复制QQ号码</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 问题解决步骤 -->
+            <div class="mb-6">
+                <h4 class="text-lg font-semibold mb-4 flex items-center">
+                    <i class="fa fa-wrench text-accent mr-2"></i>
+                    无法发起会话？分步解决方案
+                </h4>
+                
+                <div class="space-y-5">
+                    <!-- 步骤1：检查QQ客户端 -->
+                    <div class="flex gap-3">
+                        <div class="flex-shrink-0 w-8 h-8 rounded-full border-2 step-active flex items-center justify-center font-bold text-sm">1</div>
+                        <div>
+                            <h5 class="font-semibold mb-1">确保QQ客户端已安装并登录</h5>
+                            <p class="text-gray-400 text-sm">网页无法直接发起会话通常是因为没有安装QQ客户端或未登录</p>
+                        </div>
+                    </div>
+                    
+                    <!-- 步骤2：尝试官方链接 -->
+                    <div class="flex gap-3">
+                        <div class="flex-shrink-0 w-8 h-8 rounded-full border-2 step-active flex items-center justify-center font-bold text-sm">2</div>
+                        <div>
+                            <h5 class="font-semibold mb-1">使用腾讯官方链接</h5>
+                            <p class="text-gray-400 text-sm mb-2">点击下方链接，通过腾讯官方接口发起会话</p>
+                            <a href="https://wpa.qq.com/msgrd?v=3&uin=3272927512&site=qq&menu=yes" 
+                               target="_blank" rel="noopener noreferrer"
+                               class="inline-flex items-center gap-1 text-accent hover:text-accent/80 text-sm font-medium">
+                                <i class="fa fa-external-link"></i>
+                                腾讯官方会话链接
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- 步骤3：手动操作 -->
+                    <div class="flex gap-3">
+                        <div class="flex-shrink-0 w-8 h-8 rounded-full border-2 step-active flex items-center justify-center font-bold text-sm">3</div>
+                        <div>
+                            <h5 class="font-semibold mb-1">手动发起会话（100%有效）</h5>
+                            <ol class="list-decimal list-inside text-gray-400 text-sm space-y-1 ml-1">
+                                <li>打开QQ客户端，点击右上角「+」号</li>
+                                <li>选择「添加好友/群」</li>
+                                <li>粘贴QQ号码：<span class="font-medium text-white">3272927512</span></li>
+                                <li>点击搜索结果，选择「发消息」</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 备用联系方式 -->
+            <div>
+                <h4 class="text-lg font-semibold mb-4 flex items-center">
+                    <i class="fa fa-backup text-accent mr-2"></i>
+                    备用联系方式
+                </h4>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="flex items-center gap-3 p-3 bg-gray-900 rounded-lg">
+                        <i class="fa fa-envelope text-gray-400 text-xl"></i>
+                        <div>
+                            <p class="text-xs text-gray-500">电子邮箱</p>
+                            <p class="font-medium">3272927512@qq.com</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3 p-3 bg-gray-900 rounded-lg">
+                        <i class="fa fa-mobile text-gray-400 text-2xl"></i>
+                        <div>
+                            <p class="text-xs text-gray-500">手机号码</p>
+                            <p class="font-medium">+86 250 1145 1411</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 结果提示弹窗 -->
+    <div id="resultModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+        <div class="bg-gray-800 rounded-xl p-6 max-w-sm w-full mx-4 transform transition-all">
+            <div id="modalIcon" class="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center">
+                <i class="fa fa-check text-2xl"></i>
+            </div>
+            <h3 id="modalTitle" class="text-xl font-bold text-center mb-2">操作成功</h3>
+            <p id="modalMessage" class="text-gray-400 text-center mb-6">QQ号码已复制到剪贴板</p>
+            <button onclick="closeModal()" class="w-full py-3 bg-accent text-white rounded-lg hover:bg-accent/90 transition-all btn-hover">
+                确定
+            </button>
         </div>
     </div>
 
@@ -157,11 +277,11 @@
                             </li>
                         </ul>
                         
-                        <!-- 社交媒体 - QQ图标点击跳转到添加好友页面 -->
+                        <!-- 社交媒体 - QQ图标点击打开联系弹窗 -->
                         <div class="mt-6">
                             <h3 class="text-lg font-medium mb-3">社交媒体</h3>
                             <div class="flex space-x-4">
-                                <button onclick="openAddFriendPage()" 
+                                <button onclick="openContactModal('addFriend')" 
                                    class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center btn-hover cursor-pointer" 
                                    aria-label="添加QQ好友：3272927512">
                                     <i class="fa fa-qq"></i>
@@ -321,9 +441,9 @@
                     </div>
                 </div>
                 
-                <!-- 邀请按钮 - 点击跳转到添加好友页面 -->
+                <!-- 邀请按钮 - 点击打开联系弹窗 -->
                 <div class="text-center animate-fade-in delay-300">
-                    <button onclick="openAddFriendPage()" class="inline-flex items-center px-6 py-3 bg-accent text-white rounded-lg font-medium btn-hover cursor-pointer">
+                    <button onclick="openContactModal('invite')" class="inline-flex items-center px-6 py-3 bg-accent text-white rounded-lg font-medium btn-hover cursor-pointer">
                         <i class="fa fa-gamepad mr-2"></i>
                         邀请一起玩游戏
                     </button>
@@ -342,19 +462,74 @@
     <script>
         // 全局变量存储QQ号码
         const qqNumber = "3272927512";
+        const contactModal = document.getElementById('contactModal');
+        const resultModal = document.getElementById('resultModal');
         
-        // 打开添加好友页面
-        function openAddFriendPage() {
-            // 腾讯官方添加好友链接
-            const addFriendUrl = `https://wpa.qq.com/msgrd?v=3&uin=${qqNumber}&site=qq&menu=yes&action=addfriend`;
+        // 打开联系弹窗
+        function openContactModal(purpose = '') {
+            contactModal.classList.remove('hidden');
+            contactModal.classList.add('animate-fade-in');
             
-            // 尝试打开链接
-            window.open(addFriendUrl, '_blank');
+            // 根据目的自动触发相应操作
+            if (purpose === 'addFriend') {
+                setTimeout(tryAddFriend, 500);
+            } else if (purpose === 'invite') {
+                setTimeout(() => sendGameMessage('来一起玩游戏吧'), 500);
+            }
+        }
+        
+        // 关闭联系弹窗
+        function closeContactModal() {
+            contactModal.classList.add('hidden');
+        }
+        
+        // 尝试快速会话
+        function tryQuickChat() {
+            // 尝试多种协议，提高成功率
+            const urls = [
+                `tencent://message/?uin=${qqNumber}&Site=&Menu=yes&Msg=你好，想和你一起玩游戏`,
+                `https://wpa.qq.com/msgrd?v=3&uin=${qqNumber}&site=qq&menu=yes&Msg=你好，想和你一起玩游戏`
+            ];
             
-            // 延迟检查并显示备用方案
+            // 尝试打开第一个链接
+            window.open(urls[0], '_blank');
+            
+            // 1秒后尝试第二个链接（备用）
             setTimeout(() => {
-                openModal();
-            }, 1500);
+                window.open(urls[1], '_blank');
+                
+                // 显示引导提示
+                setTimeout(() => {
+                    showModal(
+                        'info', 
+                        '请稍等', 
+                        '如果没有自动打开QQ，请手动操作或尝试其他方式'
+                    );
+                }, 1000);
+            }, 1000);
+        }
+        
+        // 尝试添加好友
+        function tryAddFriend() {
+            const urls = [
+                `tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=${qqNumber}`,
+                `https://wpa.qq.com/msgrd?v=3&uin=${qqNumber}&site=qq&menu=yes&action=addfriend`
+            ];
+            
+            window.open(urls[0], '_blank');
+            
+            setTimeout(() => {
+                window.open(urls[1], '_blank');
+                
+                // 显示引导提示
+                setTimeout(() => {
+                    showModal(
+                        'info', 
+                        '请稍等', 
+                        '如果没有自动打开QQ，请手动添加好友'
+                    );
+                }, 1000);
+            }, 1000);
         }
         
         // 发送游戏邀请消息
@@ -367,33 +542,71 @@
             // 尝试打开链接
             window.open(sendMessageUrl, '_blank');
             
-            // 延迟检查并显示备用方案
+            // 显示引导提示
             setTimeout(() => {
-                openModal(message);
-            }, 1500);
-        }
-        
-        // 打开提示弹窗
-        function openModal(remark = "一起玩游戏") {
-            document.getElementById('remarkText')?.textContent || '';
-            document.getElementById('qqModal').classList.remove('hidden');
-            document.getElementById('qqModal').classList.add('animate-fade-in');
-        }
-        
-        // 关闭提示弹窗
-        function closeModal() {
-            document.getElementById('qqModal').classList.add('hidden');
+                showModal(
+                    'info', 
+                    '请稍等', 
+                    `如果没有自动打开QQ，请手动发送消息："${message}"`
+                );
+            }, 1000);
         }
         
         // 复制QQ号码到剪贴板
         function copyQQNumber() {
             navigator.clipboard.writeText(qqNumber).then(() => {
-                const copyBtn = document.querySelector('#qqModal button .fa-copy').parentElement;
-                const originalText = copyBtn.innerHTML;
-                copyBtn.innerHTML = '<i class="fa fa-check"></i> 已复制';
-                setTimeout(() => copyBtn.innerHTML = originalText, 2000);
+                showModal(
+                    'success', 
+                    '复制成功', 
+                    'QQ号码已复制到剪贴板，现在可以去QQ中粘贴搜索了'
+                );
+            }).catch(() => {
+                // 复制失败时手动显示号码
+                showModal(
+                    'error', 
+                    '复制失败', 
+                    `请手动输入QQ号码：${qqNumber}`
+                );
             });
         }
+        
+        // 显示提示弹窗
+        function showModal(type, title, message) {
+            const iconElement = document.getElementById('modalIcon');
+            const titleElement = document.getElementById('modalTitle');
+            const messageElement = document.getElementById('modalMessage');
+            
+            // 设置图标
+            if (type === 'success') {
+                iconElement.className = 'w-16 h-16 rounded-full bg-success/20 text-success mx-auto mb-4 flex items-center justify-center';
+                iconElement.innerHTML = '<i class="fa fa-check text-2xl"></i>';
+            } else if (type === 'error') {
+                iconElement.className = 'w-16 h-16 rounded-full bg-danger/20 text-danger mx-auto mb-4 flex items-center justify-center';
+                iconElement.innerHTML = '<i class="fa fa-times text-2xl"></i>';
+            } else {
+                iconElement.className = 'w-16 h-16 rounded-full bg-accent/20 text-accent mx-auto mb-4 flex items-center justify-center';
+                iconElement.innerHTML = '<i class="fa fa-info text-2xl"></i>';
+            }
+            
+            // 设置文本
+            titleElement.textContent = title;
+            messageElement.textContent = message;
+            
+            // 显示弹窗
+            resultModal.classList.remove('hidden');
+        }
+        
+        // 关闭提示弹窗
+        function closeModal() {
+            resultModal.classList.add('hidden');
+        }
+        
+        // 点击弹窗背景关闭
+        resultModal.addEventListener('click', (e) => {
+            if (e.target === resultModal) {
+                closeModal();
+            }
+        });
         
         // 页面加载动画
         window.addEventListener('load', function() {
@@ -434,4 +647,3 @@
     </script>
 </body>
 </html>
-    
