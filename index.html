@@ -46,6 +46,9 @@
             .step-active {
                 @apply bg-accent text-white border-accent;
             }
+            .browser-icon {
+                @apply w-8 h-8 rounded-full flex items-center justify-center mr-3 flex-shrink-0;
+            }
         }
     </style>
     <style>
@@ -88,6 +91,46 @@
             backdrop-filter: blur(4px);
             -webkit-backdrop-filter: blur(4px);
         }
+
+        /* 协议测试指示器 */
+        .protocol-indicator {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        /* 连接尝试进度条 */
+        .connection-progress {
+            height: 2px;
+            background: #374151;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .connection-progress-bar {
+            height: 100%;
+            background: #3B82F6;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* 连接方式区域动画 */
+        .protocols-container {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+        }
+        
+        .protocols-container.show {
+            max-height: 500px;
+        }
     </style>
 </head>
 <body class="bg-dark text-light min-h-screen font-sans overflow-x-hidden">
@@ -95,6 +138,9 @@
     <div id="loader" class="fixed inset-0 z-50 flex items-center justify-center bg-dark">
         <div class="w-16 h-16 border-4 border-accent border-t-transparent rounded-full animate-spin"></div>
     </div>
+
+    <!-- 协议测试指示器 -->
+    <div id="protocolIndicator" class="protocol-indicator"></div>
 
     <!-- 联系弹窗 -->
     <div id="contactModal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
@@ -109,6 +155,21 @@
                 </button>
             </div>
             
+            <!-- 连接状态检测 -->
+            <div class="bg-gray-900 rounded-lg p-4 mb-6">
+                <div class="flex items-center justify-between mb-2">
+                    <h4 class="font-medium flex items-center">
+                        <i class="fa fa-signal text-accent mr-2"></i>
+                        连接状态检测
+                    </h4>
+                    <span id="connectionStatus" class="text-xs px-2 py-1 bg-success/20 text-success rounded-full">已配置为Edge浏览器</span>
+                </div>
+                <p class="text-sm text-gray-400 mb-3">所有链接将通过Microsoft Edge浏览器打开</p>
+                <div class="connection-progress">
+                    <div id="connectionProgressBar" class="connection-progress-bar" style="width: 100%"></div>
+                </div>
+            </div>
+            
             <!-- 主要联系方式卡片 -->
             <div class="bg-gray-900 rounded-lg p-5 mb-6">
                 <div class="flex flex-col md:flex-row items-center gap-6">
@@ -118,7 +179,12 @@
                             <i class="fa fa-qq text-3xl text-accent"></i>
                         </div>
                         <h4 class="text-lg font-semibold mb-1">QQ联系</h4>
-                        <p class="text-gray-300">3272927512</p>
+                        <p class="text-gray-300 flex items-center justify-center md:justify-start">
+                            3272927512
+                            <button onclick="copyQQNumber()" class="ml-2 text-accent hover:underline text-xs px-2 py-0.5 bg-accent/10 rounded">
+                                <i class="fa fa-clipboard"></i> 复制
+                            </button>
+                        </p>
                     </div>
                     
                     <!-- 操作按钮组 -->
@@ -138,12 +204,66 @@
                                 <span>添加好友</span>
                             </button>
                             
-                            <!-- 复制QQ号按钮 -->
-                            <button onclick="copyQQNumber()" 
+                            <!-- 切换连接方式按钮 -->
+                            <button id="toggleProtocolsBtn" onclick="toggleAllProtocols()" 
                                     class="flex items-center justify-center gap-2 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-all btn-hover col-span-1 sm:col-span-2">
-                                <i class="fa fa-copy"></i>
-                                <span>复制QQ号码</span>
+                                <i class="fa fa-link"></i>
+                                <span>显示所有连接方式</span>
                             </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 浏览器支持区域 -->
+            <div class="bg-gray-900 rounded-lg p-5 mb-6">
+                <h4 class="text-lg font-semibold mb-4 flex items-center">
+                    <i class="fa fa-edge text-accent mr-2"></i>浏览器配置
+                </h4>
+                <p class="text-sm text-gray-400 mb-4">当前已配置为使用Microsoft Edge浏览器打开所有链接</p>
+                
+                <div class="flex items-center p-3 bg-gray-800 rounded-lg">
+                    <div class="browser-icon bg-[#FF9500]">
+                        <i class="fa fa-edge text-white"></i>
+                    </div>
+                    <div class="flex-grow">
+                        <div class="font-medium">Microsoft Edge</div>
+                        <div class="text-xs text-gray-400">已设置为默认QQ链接打开方式</div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="openWithBrowser('edge')" class="text-xs px-2 py-1 bg-accent/20 text-accent rounded hover:bg-accent/30 transition-colors">
+                            测试连接
+                        </button>
+                        <a href="https://www.microsoft.com/edge/" target="_blank" class="text-xs px-2 py-1 bg-gray-700 text-white rounded hover:bg-gray-600 transition-colors">
+                            下载Edge
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 所有连接方式 (默认隐藏) -->
+            <div id="allProtocols" class="protocols-container bg-gray-900 rounded-lg p-5 mb-6">
+                <h4 class="text-lg font-semibold mb-4">所有连接方式 (Edge协议)</h4>
+                <div class="space-y-3">
+                    <div class="p-3 bg-gray-800 rounded-lg">
+                        <p class="text-sm text-gray-400 mb-1">Edge浏览器 - 腾讯官方协议 (推荐)</p>
+                        <div class="text-accent hover:underline text-sm flex items-center">
+                            <i class="fa fa-external-link mr-2"></i>
+                            <span>microsoft-edge:https://wpa.qq.com/msgrd?v=3&uin=3272927512&site=qq&menu=yes</span>
+                        </div>
+                    </div>
+                    <div class="p-3 bg-gray-800 rounded-lg">
+                        <p class="text-sm text-gray-400 mb-1">Edge浏览器 - QQ本地协议</p>
+                        <div class="text-accent hover:underline text-sm flex items-center">
+                            <i class="fa fa-external-link mr-2"></i>
+                            <span>microsoft-edge:tencent://message/?uin=3272927512&Site=&Menu=yes</span>
+                        </div>
+                    </div>
+                    <div class="p-3 bg-gray-800 rounded-lg">
+                        <p class="text-sm text-gray-400 mb-1">Edge浏览器 - 添加好友协议</p>
+                        <div class="text-accent hover:underline text-sm flex items-center">
+                            <i class="fa fa-external-link mr-2"></i>
+                            <span>microsoft-edge:tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=3272927512</span>
                         </div>
                     </div>
                 </div>
@@ -153,45 +273,36 @@
             <div class="mb-6">
                 <h4 class="text-lg font-semibold mb-4 flex items-center">
                     <i class="fa fa-wrench text-accent mr-2"></i>
-                    无法发起会话？分步解决方案
+                    连接辅助
                 </h4>
                 
                 <div class="space-y-5">
-                    <!-- 步骤1：检查QQ客户端 -->
+                    <!-- 步骤1：检查浏览器 -->
                     <div class="flex gap-3">
                         <div class="flex-shrink-0 w-8 h-8 rounded-full border-2 step-active flex items-center justify-center font-bold text-sm">1</div>
                         <div>
-                            <h5 class="font-semibold mb-1">确保QQ客户端已安装并登录</h5>
-                            <p class="text-gray-400 text-sm">网页无法直接发起会话通常是因为没有安装QQ客户端或未登录</p>
+                            <h5 class="font-semibold mb-1">检查Edge浏览器</h5>
+                            <ul class="text-gray-400 text-sm list-disc list-inside ml-1 space-y-1">
+                                <li>确保已安装Microsoft Edge最新版本</li>
+                                <li>尝试重启Edge浏览器后再试</li>
+                                <li>确认Edge有权限打开外部链接</li>
+                            </ul>
                         </div>
                     </div>
                     
-                    <!-- 步骤2：尝试官方链接 -->
+                    <!-- 步骤2：一键复制操作 -->
                     <div class="flex gap-3">
                         <div class="flex-shrink-0 w-8 h-8 rounded-full border-2 step-active flex items-center justify-center font-bold text-sm">2</div>
                         <div>
-                            <h5 class="font-semibold mb-1">使用腾讯官方链接</h5>
-                            <p class="text-gray-400 text-sm mb-2">点击下方链接，通过腾讯官方接口发起会话</p>
-                            <a href="https://wpa.qq.com/msgrd?v=3&uin=3272927512&site=qq&menu=yes" 
-                               target="_blank" rel="noopener noreferrer"
-                               class="inline-flex items-center gap-1 text-accent hover:text-accent/80 text-sm font-medium">
-                                <i class="fa fa-external-link"></i>
-                                腾讯官方会话链接
-                            </a>
-                        </div>
-                    </div>
-                    
-                    <!-- 步骤3：手动操作 -->
-                    <div class="flex gap-3">
-                        <div class="flex-shrink-0 w-8 h-8 rounded-full border-2 step-active flex items-center justify-center font-bold text-sm">3</div>
-                        <div>
-                            <h5 class="font-semibold mb-1">手动发起会话（100%有效）</h5>
-                            <ol class="list-decimal list-inside text-gray-400 text-sm space-y-1 ml-1">
-                                <li>打开QQ客户端，点击右上角「+」号</li>
-                                <li>选择「添加好友/群」</li>
-                                <li>粘贴QQ号码：<span class="font-medium text-white">3272927512</span></li>
-                                <li>点击搜索结果，选择「发消息」</li>
-                            </ol>
+                            <h5 class="font-semibold mb-1">快捷操作</h5>
+                            <div class="flex flex-wrap gap-2 mt-2">
+                                <button onclick="copyQQNumber()" class="px-3 py-1 bg-accent/20 text-accent rounded text-sm hover:bg-accent/30 transition-colors">
+                                    <i class="fa fa-clipboard mr-1"></i>复制QQ号
+                                </button>
+                                <button onclick="window.open('https://im.qq.com/', '_blank')" class="px-3 py-1 bg-gray-700 text-white rounded text-sm hover:bg-gray-600 transition-colors">
+                                    <i class="fa fa-external-link mr-1"></i>网页版QQ
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -232,9 +343,14 @@
             </div>
             <h3 id="modalTitle" class="text-xl font-bold text-center mb-2">操作成功</h3>
             <p id="modalMessage" class="text-gray-400 text-center mb-6">QQ号码已复制到剪贴板</p>
-            <button onclick="closeModal()" class="w-full py-3 bg-accent text-white rounded-lg hover:bg-accent/90 transition-all btn-hover">
-                确定
-            </button>
+            <div class="flex gap-3">
+                <button onclick="closeModal()" class="flex-1 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-all">
+                    关闭
+                </button>
+                <button onclick="closeModal(true)" class="flex-1 py-3 bg-accent text-white rounded-lg hover:bg-accent/90 transition-all">
+                    用Edge打开
+                </button>
+            </div>
         </div>
     </div>
 
@@ -277,7 +393,7 @@
                             </li>
                         </ul>
                         
-                        <!-- 社交媒体 - QQ图标点击打开联系弹窗 -->
+                        <!-- 社交媒体 -->
                         <div class="mt-6">
                             <h3 class="text-lg font-medium mb-3">社交媒体</h3>
                             <div class="flex space-x-4">
@@ -287,6 +403,19 @@
                                     <i class="fa fa-qq"></i>
                                 </button>
                             </div>
+                        </div>
+                        
+                        <!-- 源码公开区域 -->
+                        <div class="mt-6 p-4 bg-gray-900 rounded-lg">
+                            <h3 class="text-lg font-medium mb-3 flex items-center">
+                                <i class="fa fa-code text-accent mr-2"></i>源码公开
+                            </h3>
+                            <p class="text-sm text-gray-400 mb-3">本页面源码已公开，可用于学习交流</p>
+                            <a href="https://github.com/example/game-card" target="_blank" rel="noopener noreferrer" 
+                               class="inline-flex items-center gap-1 text-accent hover:text-accent/80 text-sm font-medium p-2 bg-gray-800 rounded hover:bg-gray-700 transition-colors w-full justify-center">
+                                <i class="fa fa-github"></i>
+                                <span>查看GitHub仓库</span>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -326,7 +455,7 @@
                                         <span>我的世界</span>
                                         <span>
                                             99%
-                                            <button onclick="sendGameMessage('来玩MC')" class="ml-1 text-accent hover:underline cursor-pointer">
+                                            <button onclick="showGameInvitation('我的世界')" class="ml-1 text-accent hover:underline cursor-pointer">
                                                 <i class="fa fa-comment"></i>
                                             </button>
                                         </span>
@@ -340,7 +469,7 @@
                                         <span>Apex</span>
                                         <span>
                                             60%
-                                            <button onclick="sendGameMessage('来玩Apex')" class="ml-1 text-accent hover:underline cursor-pointer">
+                                            <button onclick="showGameInvitation('Apex')" class="ml-1 text-accent hover:underline cursor-pointer">
                                                 <i class="fa fa-comment"></i>
                                             </button>
                                         </span>
@@ -354,7 +483,7 @@
                                         <span>求生之路2</span>
                                         <span>
                                             70%
-                                            <button onclick="sendGameMessage('来玩求2')" class="ml-1 text-accent hover:underline cursor-pointer">
+                                            <button onclick="showGameInvitation('求生之路2')" class="ml-1 text-accent hover:underline cursor-pointer">
                                                 <i class="fa fa-comment"></i>
                                             </button>
                                         </span>
@@ -375,7 +504,7 @@
                                         <span>守望先锋</span>
                                         <span>
                                             40%
-                                            <button onclick="sendGameMessage('来玩守望先锋')" class="ml-1 text-accent hover:underline cursor-pointer">
+                                            <button onclick="showGameInvitation('守望先锋')" class="ml-1 text-accent hover:underline cursor-pointer">
                                                 <i class="fa fa-comment"></i>
                                             </button>
                                         </span>
@@ -389,7 +518,7 @@
                                         <span>PUBG</span>
                                         <span>
                                             15%
-                                            <button onclick="sendGameMessage('来玩PUBG')" class="ml-1 text-accent hover:underline cursor-pointer">
+                                            <button onclick="showGameInvitation('PUBG')" class="ml-1 text-accent hover:underline cursor-pointer">
                                                 <i class="fa fa-comment"></i>
                                             </button>
                                         </span>
@@ -403,7 +532,7 @@
                                         <span>逃生：试炼</span>
                                         <span>
                                             30%
-                                            <button onclick="sendGameMessage('来玩逃生试炼')" class="ml-1 text-accent hover:underline cursor-pointer">
+                                            <button onclick="showGameInvitation('逃生：试炼')" class="ml-1 text-accent hover:underline cursor-pointer">
                                                 <i class="fa fa-comment"></i>
                                             </button>
                                         </span>
@@ -429,13 +558,13 @@
                     <div class="space-y-6">
                         <div class="relative pl-6 border-l-2 border-gray-700 before:absolute before:left-[-9px] before:top-0 before:w-4 before:h-4 before:rounded-full before:bg-accent">
                             <h3 class="text-lg font-medium">服务器管理员 | 我的世界社区</h3>
-                            <p class="text-gray-400 mb-2">2007年 - 至今</p>
+                            <p class="text-gray-400 mb-2">2020年 - 至今</p>
                             <p class="text-gray-300">负责游戏服务器日常维护，创建友好游戏环境，解决玩家问题，组织线上活动。</p>
                         </div>
                         
                         <div class="relative pl-6 border-l-2 border-gray-700 before:absolute before:left-[-9px] before:top-0 before:w-4 before:h-4 before:rounded-full before:bg-accent">
                             <h3 class="text-lg font-medium">游戏测评员 | 游戏论坛</h3>
-                            <p class="text-gray-400 mb-2">2007年 - 2025年</p>
+                            <p class="text-gray-400 mb-2">2018年 - 2020年</p>
                             <p class="text-gray-300">参与多款游戏测试，撰写测评报告，提供游戏体验优化建议。</p>
                         </div>
                     </div>
@@ -453,7 +582,7 @@
         
         <!-- 页脚 -->
         <footer class="mt-16 text-center text-gray-400 animate-fade-in delay-400">
-            <p>&copy; 2023年 - 至今 烟头. 保留所有权利.</p>
+            <p>&copy; 2023 烟头. 保留所有权利.</p>
             <p class="mt-2">游戏爱好者</p>
         </footer>
     </div>
@@ -464,17 +593,113 @@
         const qqNumber = "3272927512";
         const contactModal = document.getElementById('contactModal');
         const resultModal = document.getElementById('resultModal');
+        const protocolIndicator = document.getElementById('protocolIndicator');
+        const connectionStatus = document.getElementById('connectionStatus');
+        const connectionProgressBar = document.getElementById('connectionProgressBar');
+        const allProtocols = document.getElementById('allProtocols');
+        const toggleProtocolsBtn = document.getElementById('toggleProtocolsBtn');
+        let connectionAttempts = 0; // 记录连接尝试次数，避免频繁提示
+        
+        // 固定使用Edge浏览器协议
+        const edgeProtocol = 'microsoft-edge:';
+        
+        // QQ链接模板 - 全部使用Edge协议
+        const qqLinks = {
+            chat: `${edgeProtocol}https://wpa.qq.com/msgrd?v=3&uin=${qqNumber}&site=qq&menu=yes`,
+            chatWithMsg: (message) => `${edgeProtocol}https://wpa.qq.com/msgrd?v=3&uin=${qqNumber}&site=qq&menu=yes&Msg=${encodeURIComponent(message)}`,
+            addFriend: `${edgeProtocol}tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=${qqNumber}`,
+            webQQ: `${edgeProtocol}https://im.qq.com/`
+        };
+        
+        // 页面加载时初始化
+        window.addEventListener('load', function() {
+            // 页面加载动画
+            setTimeout(function() {
+                document.getElementById('loader').classList.add('opacity-0', 'pointer-events-none');
+                document.getElementById('loader').style.transition = 'opacity 0.5s ease';
+                
+                setTimeout(function() {
+                    document.getElementById('main-content').classList.add('opacity-100');
+                    document.getElementById('main-content').style.transition = 'opacity 0.8s ease';
+                }, 300);
+            }, 800);
+        });
+        
+        // 切换所有连接方式的显示/隐藏状态
+        function toggleAllProtocols() {
+            // 切换显示状态
+            allProtocols.classList.toggle('show');
+            
+            // 更新按钮文本和图标
+            if (allProtocols.classList.contains('show')) {
+                toggleProtocolsBtn.innerHTML = '<i class="fa fa-chevron-up"></i><span>关闭所有连接方式</span>';
+            } else {
+                toggleProtocolsBtn.innerHTML = '<i class="fa fa-link"></i><span>显示所有连接方式</span>';
+            }
+        }
+        
+        // 使用Edge浏览器打开链接
+        function openWithBrowser() {
+            try {
+                // 使用Edge协议打开链接
+                const popup = window.open(qqLinks.chat, '_blank');
+                
+                if (popup && !popup.closed) {
+                    showProtocolIndicator('正在使用Edge浏览器打开链接');
+                    connectionAttempts = 0; // 重置尝试次数
+                } else {
+                    // 仅在多次尝试后才显示失败提示
+                    connectionAttempts++;
+                    if (connectionAttempts > 1) {
+                        showModal(
+                            'info',
+                            '浏览器辅助',
+                            '建议检查Microsoft Edge是否正确安装并设置为默认浏览器'
+                        );
+                    } else {
+                        showProtocolIndicator('尝试使用Edge浏览器打开', false);
+                    }
+                }
+            } catch (e) {
+                console.log('使用Edge打开失败', e);
+                connectionAttempts++;
+                if (connectionAttempts > 1) {
+                    showModal(
+                        'info',
+                        '操作辅助',
+                        '可尝试手动打开Edge浏览器并访问QQ网页版'
+                    );
+                }
+            }
+        }
+        
+        // 显示协议测试指示器
+        function showProtocolIndicator(message, isSuccess = true) {
+            protocolIndicator.textContent = message;
+            protocolIndicator.className = 'protocol-indicator';
+            protocolIndicator.classList.add(isSuccess ? 'bg-success/80' : 'bg-warning/80');
+            protocolIndicator.style.opacity = '1';
+            
+            setTimeout(() => {
+                protocolIndicator.style.opacity = '0';
+            }, 2000);
+        }
         
         // 打开联系弹窗
         function openContactModal(purpose = '') {
             contactModal.classList.remove('hidden');
             contactModal.classList.add('animate-fade-in');
             
-            // 根据目的自动触发相应操作
+            // 确保连接方式区域默认是关闭的
+            if (allProtocols.classList.contains('show')) {
+                toggleAllProtocols();
+            }
+            
+            // 根据目的显示相应内容，不自动跳转
             if (purpose === 'addFriend') {
-                setTimeout(tryAddFriend, 500);
+                showProtocolIndicator('请使用"添加好友"按钮发起连接');
             } else if (purpose === 'invite') {
-                setTimeout(() => sendGameMessage('来玩游戏'), 500);
+                showProtocolIndicator('请使用"快速发起会话"按钮发送邀请');
             }
         }
         
@@ -483,73 +708,82 @@
             contactModal.classList.add('hidden');
         }
         
-        // 尝试快速会话
+        // 尝试快速会话 - 使用Edge协议
         function tryQuickChat() {
-            // 尝试多种协议，提高成功率
-            const urls = [
-                `tencent://message/?uin=${qqNumber}&Site=&Menu=yes&Msg=你好，一起玩吗`,
-                `https://wpa.qq.com/msgrd?v=3&uin=${qqNumber}&site=qq&menu=yes&Msg=你好，一起玩吗`
-            ];
-            
-            // 尝试打开第一个链接
-            window.open(urls[0], '_blank');
-            
-            // 1秒后尝试第二个链接（备用）
-            setTimeout(() => {
-                window.open(urls[1], '_blank');
+            try {
+                // 使用Edge协议打开聊天链接
+                const popup = window.open(qqLinks.chat, '_blank');
                 
-                // 显示引导提示
-                setTimeout(() => {
-                    showModal(
-                        'info', 
-                        '请稍等', 
-                        '如果没有自动打开QQ或打开失败，请手动操作或尝试其他方式'
-                    );
-                }, 1000);
-            }, 1000);
-        }
-        
-        // 尝试添加好友
-        function tryAddFriend() {
-            const urls = [
-                `tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=${qqNumber}`,
-                `https://wpa.qq.com/msgrd?v=3&uin=${qqNumber}&site=qq&menu=yes&action=addfriend`
-            ];
-            
-            window.open(urls[0], '_blank');
-            
-            setTimeout(() => {
-                window.open(urls[1], '_blank');
-                
-                // 显示引导提示
-                setTimeout(() => {
-                    showModal(
-                        'info', 
-                        '请稍等', 
-                        '如果没有自动打开QQ或打开失败，请手动添加好友'
-                    );
-                }, 1000);
-            }, 1000);
-        }
-        
-        // 发送游戏邀请消息
-        function sendGameMessage(message) {
-            // 对消息进行编码
-            const encodedMsg = encodeURIComponent(message);
-            // 腾讯官方发送消息链接
-            const sendMessageUrl = `https://wpa.qq.com/msgrd?v=3&uin=${qqNumber}&site=qq&menu=yes&msg=${encodedMsg}`;
-            
-            // 尝试打开链接
-            window.open(sendMessageUrl, '_blank');
-            
-            // 显示引导提示
-            setTimeout(() => {
+                if (popup && !popup.closed) {
+                    showProtocolIndicator('正在通过Edge浏览器打开会话窗口');
+                    connectionAttempts = 0;
+                } else {
+                    connectionAttempts++;
+                    if (connectionAttempts > 1) {
+                        showModal(
+                            'info', 
+                            '连接辅助', 
+                            '1. 确保Edge浏览器已安装\n2. 尝试手动打开Edge\n3. 在Edge中访问QQ网页版'
+                        );
+                    } else {
+                        showProtocolIndicator('会话窗口打开中...', false);
+                    }
+                }
+            } catch (e) {
+                console.log('快速会话失败', e);
                 showModal(
                     'info', 
-                    '请稍等', 
-                    `如果没有自动打开QQ或打开失败，请手动发送消息："${message}"`
+                    '连接辅助', 
+                    '可通过QQ网页版发起会话:\nhttps://im.qq.com/'
                 );
-            }, 1000);
+            }
+        }
+        
+        // 尝试添加好友 - 使用Edge协议
+        function tryAddFriend() {
+            try {
+                // 使用Edge协议打开添加好友链接
+                const popup = window.open(qqLinks.addFriend, '_blank');
+                
+                if (popup && !popup.closed) {
+                    showProtocolIndicator('正在通过Edge浏览器打开添加好友窗口');
+                    connectionAttempts = 0;
+                } else {
+                    connectionAttempts++;
+                    if (connectionAttempts > 1) {
+                        showModal(
+                            'info', 
+                            '添加好友辅助', 
+                            '1. 复制QQ号：3272927512\n2. 打开Edge浏览器\n3. 访问QQ网页版添加好友'
+                        );
+                    } else {
+                        showProtocolIndicator('添加好友窗口打开中...', false);
+                    }
+                }
+            } catch (e) {
+                console.log('添加好友失败', e);
+                showModal(
+                    'info', 
+                    '添加好友辅助', 
+                    'QQ号：3272927512\n可在Edge浏览器中访问QQ网页版添加'
+                );
+            }
+        }
+        
+        // 显示游戏邀请信息，不自动跳转
+        function showGameInvitation(gameName) {
+            const message = `来玩${gameName}吧`;
+            showModal(
+                'info',
+                '游戏邀请',
+                `邀请消息: "${message}"\n\n点击"用Edge打开"按钮发送`
+            );
+            
+            // 重写模态框的"用Edge打开"按钮功能
+            const openButton = resultModal.querySelector('button:last-child');
+            openButton.onclick = function() {
+                closeModal(true, message);
+            };
         }
         
         // 复制QQ号码到剪贴板
@@ -558,14 +792,15 @@
                 showModal(
                     'success', 
                     '复制成功', 
-                    'QQ号码已复制到剪贴板，现在可以去QQ中粘贴搜索了'
+                    'QQ号码已复制到剪贴板，可以粘贴使用了'
                 );
+                connectionAttempts = 0;
             }).catch(() => {
                 // 复制失败时手动显示号码
                 showModal(
-                    'error', 
-                    '复制失败', 
-                    `请手动输入QQ号码：${qqNumber}`
+                    'info', 
+                    '复制辅助', 
+                    `QQ号码：${qqNumber}\n请手动输入添加`
                 );
             });
         }
@@ -576,13 +811,16 @@
             const titleElement = document.getElementById('modalTitle');
             const messageElement = document.getElementById('modalMessage');
             
+            // 将换行符转换为<br>
+            messageElement.innerHTML = message.replace(/\n/g, '<br>');
+            
             // 设置图标
             if (type === 'success') {
                 iconElement.className = 'w-16 h-16 rounded-full bg-success/20 text-success mx-auto mb-4 flex items-center justify-center';
                 iconElement.innerHTML = '<i class="fa fa-check text-2xl"></i>';
             } else if (type === 'error') {
-                iconElement.className = 'w-16 h-16 rounded-full bg-danger/20 text-danger mx-auto mb-4 flex items-center justify-center';
-                iconElement.innerHTML = '<i class="fa fa-times text-2xl"></i>';
+                iconElement.className = 'w-16 h-16 rounded-full bg-warning/20 text-warning mx-auto mb-4 flex items-center justify-center';
+                iconElement.innerHTML = '<i class="fa fa-exclamation-triangle text-2xl"></i>';
             } else {
                 iconElement.className = 'w-16 h-16 rounded-full bg-accent/20 text-accent mx-auto mb-4 flex items-center justify-center';
                 iconElement.innerHTML = '<i class="fa fa-info text-2xl"></i>';
@@ -590,15 +828,26 @@
             
             // 设置文本
             titleElement.textContent = title;
-            messageElement.textContent = message;
             
             // 显示弹窗
             resultModal.classList.remove('hidden');
         }
         
         // 关闭提示弹窗
-        function closeModal() {
+        function closeModal(openEdge = false, message = '你好，想和你一起玩游戏') {
             resultModal.classList.add('hidden');
+            
+            // 如果需要，尝试用Edge打开
+            if (openEdge) {
+                try {
+                    // 使用带消息的链接
+                    window.open(qqLinks.chatWithMsg(message), '_blank');
+                    showProtocolIndicator('正在通过Edge浏览器发送消息');
+                } catch (e) {
+                    console.log('打开Edge失败', e);
+                    showProtocolIndicator('请手动打开Edge浏览器发送消息', false);
+                }
+            }
         }
         
         // 点击弹窗背景关闭
@@ -606,19 +855,6 @@
             if (e.target === resultModal) {
                 closeModal();
             }
-        });
-        
-        // 页面加载动画
-        window.addEventListener('load', function() {
-            setTimeout(function() {
-                document.getElementById('loader').classList.add('opacity-0', 'pointer-events-none');
-                document.getElementById('loader').style.transition = 'opacity 0.5s ease';
-                
-                setTimeout(function() {
-                    document.getElementById('main-content').classList.add('opacity-100');
-                    document.getElementById('main-content').style.transition = 'opacity 0.8s ease';
-                }, 300);
-            }, 800);
         });
         
         // 滚动动画
@@ -647,6 +883,3 @@
     </script>
 </body>
 </html>
-
-
-
