@@ -131,6 +131,12 @@
         .protocols-container.show {
             max-height: 500px;
         }
+
+        /* 检测后操作按钮 */
+        .detection-action {
+            margin-top: 10px;
+            display: none;
+        }
     </style>
 </head>
 <body class="bg-dark text-light min-h-screen font-sans overflow-x-hidden">
@@ -171,6 +177,12 @@
                 <button onclick="testAllProtocols(true)" class="text-sm px-3 py-1.5 bg-accent/20 text-accent rounded-lg hover:bg-accent/30 transition-colors mt-3">
                     <i class="fa fa-refresh mr-1"></i>重新检测连接
                 </button>
+                <!-- 新增：检测后显示的操作按钮 -->
+                <div id="detectionAction" class="detection-action">
+                    <button onclick="useBestProtocol()" class="text-sm px-3 py-1.5 bg-success/20 text-success rounded-lg hover:bg-success/30 transition-colors">
+                        <i class="fa fa-external-link mr-1"></i>使用最佳连接方式
+                    </button>
+                </div>
             </div>
             
             <!-- 主要联系方式卡片 -->
@@ -671,14 +683,15 @@
         const connectionProgressBar = document.getElementById('connectionProgressBar');
         const allProtocols = document.getElementById('allProtocols');
         const toggleProtocolsBtn = document.getElementById('toggleProtocolsBtn');
+        const detectionAction = document.getElementById('detectionAction');
         let bestProtocol = null;
         let connectionAttempts = 0; // 记录连接尝试次数，避免频繁提示
         let currentGameMessage = ''; // 存储当前游戏邀请消息
         
-        // 浏览器协议映射
+        // 浏览器协议映射 - 修复Edge浏览器协议前缀
         const browserProtocols = {
             chrome: 'googlechrome://',
-            edge: 'microsoft-edge:',
+            edge: 'microsoft-edge://',
             firefox: 'firefox://',
             qq: 'qqbrowser://'
         };
@@ -686,7 +699,7 @@
         // QQ链接模板
         const qqLinkTemplate = `https://wpa.qq.com/msgrd?v=3&uin=${qqNumber}&site=qq&menu=yes&Msg=你好，想和你一起玩游戏`;
         
-        // 页面加载时初始化（移除自动协议检测，避免自动跳转）
+        // 页面加载时初始化
         window.addEventListener('load', function() {
             // 页面加载动画
             setTimeout(function() {
@@ -780,11 +793,12 @@
             }, 2000);
         }
         
-        // 测试所有协议连接（手动触发，不自动执行）
+        // 测试所有协议连接（手动触发）
         function testAllProtocols(showDetails = false) {
             connectionStatus.textContent = '检测中...';
             connectionStatus.className = 'text-xs px-2 py-1 bg-warning/20 text-warning rounded-full';
             connectionProgressBar.style.width = '0%';
+            detectionAction.style.display = 'none'; // 隐藏操作按钮
             
             const protocols = [
                 {
@@ -860,15 +874,12 @@
                         };
                         xhr.send();
                     } else {
-                        // 本地协议无法通过XHR检测，设置超时后默认有效
-                        setTimeout(() => {
-                            clearTimeout(timeout);
-                            isProtocolValid = true;
-                            if (!bestProtocol) {
-                                bestProtocol = protocols[index];
-                            }
-                            cleanup();
-                        }, 1500);
+                        // 本地协议处理优化：直接标记为有效并设置为最佳协议（如果还没有的话）
+                        isProtocolValid = true;
+                        if (!bestProtocol) {
+                            bestProtocol = protocols[index];
+                        }
+                        cleanup();
                     }
                     
                     function cleanup() {
@@ -885,6 +896,7 @@
                 if (bestProtocol) {
                     connectionStatus.textContent = `最佳: ${bestProtocol.name}`;
                     connectionStatus.className = 'text-xs px-2 py-1 bg-success/20 text-success rounded-full';
+                    detectionAction.style.display = 'block'; // 显示操作按钮
                     if (showDetails) {
                         showProtocolIndicator(`检测完成，最佳连接方式: ${bestProtocol.name}`);
                     }
@@ -898,7 +910,33 @@
             });
         }
         
-        // 打开联系弹窗（移除自动触发操作，避免自动跳转）
+        // 新增：使用最佳协议进行连接
+        function useBestProtocol() {
+            if (!bestProtocol) {
+                showProtocolIndicator('未找到最佳连接方式，请先检测', false);
+                return;
+            }
+            
+            try {
+                // 根据协议类型添加适当的消息参数
+                let url = bestProtocol.url;
+                if (bestProtocol.name.includes('添加好友')) {
+                    // 好友添加协议不需要消息
+                    window.open(url, '_blank');
+                } else {
+                    // 会话协议添加消息参数
+                    const encodedMsg = encodeURIComponent('你好，想和你一起玩游戏');
+                    url += (url.includes('?') ? '&' : '?') + `Msg=${encodedMsg}`;
+                    window.open(url, '_blank');
+                }
+                showProtocolIndicator(`正在使用${bestProtocol.name}连接`);
+            } catch (e) {
+                console.log('使用最佳协议连接失败', e);
+                showProtocolIndicator('连接失败，请尝试其他方式', false);
+            }
+        }
+        
+        // 打开联系弹窗
         function openContactModal(purpose = '') {
             contactModal.classList.remove('hidden');
             contactModal.classList.add('animate-fade-in');
@@ -908,7 +946,7 @@
                 toggleAllProtocols();
             }
             
-            // 仅显示提示，不自动触发跳转
+            // 显示提示
             if (purpose === 'addFriend') {
                 showProtocolIndicator('请点击"添加好友"按钮发起连接');
             } else if (purpose === 'invite') {
@@ -921,7 +959,7 @@
             contactModal.classList.add('hidden');
         }
         
-        // 尝试快速会话 - 需手动点击触发
+        // 尝试快速会话
         function tryQuickChat(useBestProtocol = false) {
             // 准备多种协议，按优先级排序
             const protocols = [
@@ -933,11 +971,12 @@
             // 如果有最佳协议且用户同意使用，则优先使用
             let urls = protocols;
             if (useBestProtocol && bestProtocol) {
-                urls = [bestProtocol.url + '&Msg=你好，想和你一起玩游戏'];
+                const encodedMsg = encodeURIComponent('你好，想和你一起玩游戏');
+                urls = [bestProtocol.url + (bestProtocol.url.includes('?') ? '&' : '?') + `Msg=${encodedMsg}`];
                 showProtocolIndicator(`正在连接...`);
             }
             
-            // 尝试打开链接，使用链式调用确保每个链接依次尝试
+            // 尝试打开链接
             connectionAttempts = 0;
             
             function attemptConnection(urlIndex) {
@@ -993,7 +1032,7 @@
             attemptConnection(0);
         }
         
-        // 尝试添加好友 - 需手动点击触发
+        // 尝试添加好友
         function tryAddFriend(useBestProtocol = false) {
             const protocols = [
                 `tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=${qqNumber}`,
@@ -1058,7 +1097,7 @@
             attemptConnection(0);
         }
         
-        // 显示游戏邀请信息（不自动跳转，需手动触发）
+        // 显示游戏邀请信息
         function showGameInvitation(gameName) {
             currentGameMessage = `来玩${gameName}吧`;
             showModal(
@@ -1125,7 +1164,7 @@
         function closeModal(openQQ = false) {
             resultModal.classList.add('hidden');
             
-            // 如果需要，尝试打开QQ（需手动确认）
+            // 如果需要，尝试打开QQ
             if (openQQ && currentGameMessage) {
                 const encodedMsg = encodeURIComponent(currentGameMessage);
                 const url = `https://wpa.qq.com/msgrd?v=3&uin=${qqNumber}&site=qq&menu=yes&Msg=${encodedMsg}`;
