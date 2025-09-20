@@ -162,12 +162,15 @@
                         <i class="fa fa-signal text-accent mr-2"></i>
                         连接状态检测
                     </h4>
-                    <span id="connectionStatus" class="text-xs px-2 py-1 bg-success/20 text-success rounded-full">已配置为Edge浏览器</span>
+                    <span id="connectionStatus" class="text-xs px-2 py-1 bg-gray-700 rounded-full">未检测</span>
                 </div>
-                <p class="text-sm text-gray-400 mb-3">所有链接将通过Microsoft Edge浏览器打开</p>
+                <p class="text-sm text-gray-400 mb-3">点击下方按钮手动检测最佳连接方式</p>
                 <div class="connection-progress">
-                    <div id="connectionProgressBar" class="connection-progress-bar" style="width: 100%"></div>
+                    <div id="connectionProgressBar" class="connection-progress-bar"></div>
                 </div>
+                <button onclick="testAllProtocols(true)" class="text-sm px-3 py-1.5 bg-accent/20 text-accent rounded-lg hover:bg-accent/30 transition-colors mt-3">
+                    <i class="fa fa-refresh mr-1"></i>重新检测连接
+                </button>
             </div>
             
             <!-- 主要联系方式卡片 -->
@@ -191,14 +194,14 @@
                     <div class="flex-grow w-full">
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <!-- 快速会话按钮 -->
-                            <button onclick="tryQuickChat()" 
+                            <button onclick="tryQuickChat(true)" 
                                     class="flex items-center justify-center gap-2 px-4 py-2 bg-accent text-white rounded-lg hover:bg-accent/90 transition-all btn-hover">
                                 <i class="fa fa-comments"></i>
                                 <span>快速发起会话</span>
                             </button>
                             
                             <!-- 添加好友按钮 -->
-                            <button onclick="tryAddFriend()" 
+                            <button onclick="tryAddFriend(true)" 
                                     class="flex items-center justify-center gap-2 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-all btn-hover">
                                 <i class="fa fa-user-plus"></i>
                                 <span>添加好友</span>
@@ -218,53 +221,123 @@
             <!-- 浏览器支持区域 -->
             <div class="bg-gray-900 rounded-lg p-5 mb-6">
                 <h4 class="text-lg font-semibold mb-4 flex items-center">
-                    <i class="fa fa-edge text-accent mr-2"></i>浏览器配置
+                    <i class="fa fa-chrome text-accent mr-2"></i>浏览器支持
                 </h4>
-                <p class="text-sm text-gray-400 mb-4">当前已配置为使用Microsoft Edge浏览器打开所有链接</p>
+                <p class="text-sm text-gray-400 mb-4">不同浏览器对QQ协议支持不同，尝试使用以下浏览器打开链接：</p>
                 
-                <div class="flex items-center p-3 bg-gray-800 rounded-lg">
-                    <div class="browser-icon bg-[#FF9500]">
-                        <i class="fa fa-edge text-white"></i>
+                <div class="space-y-3">
+                    <div class="flex items-center p-3 bg-gray-800 rounded-lg">
+                        <div class="browser-icon bg-[#4285F4]">
+                            <i class="fa fa-chrome text-white"></i>
+                        </div>
+                        <div class="flex-grow">
+                            <div class="font-medium">Google Chrome</div>
+                            <div class="text-xs text-gray-400">版本 110+ 支持最佳</div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="openWithBrowser('chrome')" class="text-xs px-2 py-1 bg-accent/20 text-accent rounded hover:bg-accent/30 transition-colors">
+                                尝试打开
+                            </button>
+                            <a href="https://www.google.cn/chrome/" target="_blank" class="text-xs px-2 py-1 bg-gray-700 text-white rounded hover:bg-gray-600 transition-colors">
+                                下载
+                            </a>
+                        </div>
                     </div>
-                    <div class="flex-grow">
-                        <div class="font-medium">Microsoft Edge</div>
-                        <div class="text-xs text-gray-400">已设置为默认QQ链接打开方式</div>
+                    
+                    <div class="flex items-center p-3 bg-gray-800 rounded-lg">
+                        <div class="browser-icon bg-[#FF9500]">
+                            <i class="fa fa-edge text-white"></i>
+                        </div>
+                        <div class="flex-grow">
+                            <div class="font-medium">Microsoft Edge</div>
+                            <div class="text-xs text-gray-400">版本 110+ 支持良好</div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="openWithBrowser('edge')" class="text-xs px-2 py-1 bg-accent/20 text-accent rounded hover:bg-accent/30 transition-colors">
+                                尝试打开
+                            </button>
+                            <a href="https://www.microsoft.com/edge/" target="_blank" class="text-xs px-2 py-1 bg-gray-700 text-white rounded hover:bg-gray-600 transition-colors">
+                                下载
+                            </a>
+                        </div>
                     </div>
-                    <div class="flex gap-2">
-                        <button onclick="openWithBrowser('edge')" class="text-xs px-2 py-1 bg-accent/20 text-accent rounded hover:bg-accent/30 transition-colors">
-                            测试连接
-                        </button>
-                        <a href="https://www.microsoft.com/edge/" target="_blank" class="text-xs px-2 py-1 bg-gray-700 text-white rounded hover:bg-gray-600 transition-colors">
-                            下载Edge
-                        </a>
+                    
+                    <div class="flex items-center p-3 bg-gray-800 rounded-lg">
+                        <div class="browser-icon bg-[#FF6B00]">
+                            <i class="fa fa-firefox text-white"></i>
+                        </div>
+                        <div class="flex-grow">
+                            <div class="font-medium">Mozilla Firefox</div>
+                            <div class="text-xs text-gray-400">版本 109+ 支持良好</div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="openWithBrowser('firefox')" class="text-xs px-2 py-1 bg-accent/20 text-accent rounded hover:bg-accent/30 transition-colors">
+                                尝试打开
+                            </button>
+                            <a href="https://www.mozilla.org/zh-CN/firefox/new/" target="_blank" class="text-xs px-2 py-1 bg-gray-700 text-white rounded hover:bg-gray-600 transition-colors">
+                                下载
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center p-3 bg-gray-800 rounded-lg">
+                        <div class="browser-icon bg-[#2D55FF]">
+                            <i class="fa fa-qq text-white"></i>
+                        </div>
+                        <div class="flex-grow">
+                            <div class="font-medium">QQ浏览器</div>
+                            <div class="text-xs text-gray-400">版本 13+ 对QQ协议支持最佳</div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="openWithBrowser('qq')" class="text-xs px-2 py-1 bg-accent/20 text-accent rounded hover:bg-accent/30 transition-colors">
+                                尝试打开
+                            </button>
+                            <a href="https://browser.qq.com/" target="_blank" class="text-xs px-2 py-1 bg-gray-700 text-white rounded hover:bg-gray-600 transition-colors">
+                                下载
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
             
             <!-- 所有连接方式 (默认隐藏) -->
             <div id="allProtocols" class="protocols-container bg-gray-900 rounded-lg p-5 mb-6">
-                <h4 class="text-lg font-semibold mb-4">所有连接方式 (Edge协议)</h4>
+                <h4 class="text-lg font-semibold mb-4">所有连接方式</h4>
                 <div class="space-y-3">
                     <div class="p-3 bg-gray-800 rounded-lg">
-                        <p class="text-sm text-gray-400 mb-1">Edge浏览器 - 腾讯官方协议 (推荐)</p>
-                        <div class="text-accent hover:underline text-sm flex items-center">
+                        <p class="text-sm text-gray-400 mb-1">腾讯官方协议 (推荐)</p>
+                        <a href="https://wpa.qq.com/msgrd?v=3&uin=3272927512&site=qq&menu=yes" target="_blank" class="text-accent hover:underline text-sm flex items-center">
                             <i class="fa fa-external-link mr-2"></i>
-                            <span>microsoft-edge:https://wpa.qq.com/msgrd?v=3&uin=3272927512&site=qq&menu=yes</span>
-                        </div>
+                            https://wpa.qq.com/msgrd?v=3&uin=3272927512&site=qq&menu=yes
+                        </a>
                     </div>
                     <div class="p-3 bg-gray-800 rounded-lg">
-                        <p class="text-sm text-gray-400 mb-1">Edge浏览器 - QQ本地协议</p>
-                        <div class="text-accent hover:underline text-sm flex items-center">
+                        <p class="text-sm text-gray-400 mb-1">QQ本地协议 1</p>
+                        <a href="tencent://message/?uin=3272927512&Site=&Menu=yes" target="_blank" class="text-accent hover:underline text-sm flex items-center">
                             <i class="fa fa-external-link mr-2"></i>
-                            <span>microsoft-edge:tencent://message/?uin=3272927512&Site=&Menu=yes</span>
-                        </div>
+                            tencent://message/?uin=3272927512&Site=&Menu=yes
+                        </a>
                     </div>
                     <div class="p-3 bg-gray-800 rounded-lg">
-                        <p class="text-sm text-gray-400 mb-1">Edge浏览器 - 添加好友协议</p>
-                        <div class="text-accent hover:underline text-sm flex items-center">
+                        <p class="text-sm text-gray-400 mb-1">QQ本地协议 2</p>
+                        <a href="mqq://im/chat?chat_type=wpa&uin=3272927512&version=1" target="_blank" class="text-accent hover:underline text-sm flex items-center">
                             <i class="fa fa-external-link mr-2"></i>
-                            <span>microsoft-edge:tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=3272927512</span>
-                        </div>
+                            mqq://im/chat?chat_type=wpa&uin=3272927512&version=1
+                        </a>
+                    </div>
+                    <div class="p-3 bg-gray-800 rounded-lg">
+                        <p class="text-sm text-gray-400 mb-1">QQ添加好友协议</p>
+                        <a href="tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=3272927512" target="_blank" class="text-accent hover:underline text-sm flex items-center">
+                            <i class="fa fa-external-link mr-2"></i>
+                            tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=3272927512
+                        </a>
+                    </div>
+                    <div class="p-3 bg-gray-800 rounded-lg">
+                        <p class="text-sm text-gray-400 mb-1">QQ空间临时会话</p>
+                        <a href="https://user.qzone.qq.com/3272927512" target="_blank" class="text-accent hover:underline text-sm flex items-center">
+                            <i class="fa fa-external-link mr-2"></i>
+                            https://user.qzone.qq.com/3272927512 (通过QQ空间留言)
+                        </a>
                     </div>
                 </div>
             </div>
@@ -277,15 +350,15 @@
                 </h4>
                 
                 <div class="space-y-5">
-                    <!-- 步骤1：检查浏览器 -->
+                    <!-- 步骤1：检查网络和客户端 -->
                     <div class="flex gap-3">
                         <div class="flex-shrink-0 w-8 h-8 rounded-full border-2 step-active flex items-center justify-center font-bold text-sm">1</div>
                         <div>
-                            <h5 class="font-semibold mb-1">检查Edge浏览器</h5>
+                            <h5 class="font-semibold mb-1">检查QQ客户端</h5>
                             <ul class="text-gray-400 text-sm list-disc list-inside ml-1 space-y-1">
-                                <li>确保已安装Microsoft Edge最新版本</li>
-                                <li>尝试重启Edge浏览器后再试</li>
-                                <li>确认Edge有权限打开外部链接</li>
+                                <li>确保QQ已安装并登录最新版本</li>
+                                <li>尝试重启QQ客户端后再试</li>
+                                <li>确认QQ主面板"设置-权限设置"中允许临时会话</li>
                             </ul>
                         </div>
                     </div>
@@ -348,7 +421,7 @@
                     关闭
                 </button>
                 <button onclick="closeModal(true)" class="flex-1 py-3 bg-accent text-white rounded-lg hover:bg-accent/90 transition-all">
-                    用Edge打开
+                    打开QQ
                 </button>
             </div>
         </div>
@@ -598,20 +671,22 @@
         const connectionProgressBar = document.getElementById('connectionProgressBar');
         const allProtocols = document.getElementById('allProtocols');
         const toggleProtocolsBtn = document.getElementById('toggleProtocolsBtn');
+        let bestProtocol = null;
         let connectionAttempts = 0; // 记录连接尝试次数，避免频繁提示
+        let currentGameMessage = ''; // 存储当前游戏邀请消息
         
-        // 固定使用Edge浏览器协议
-        const edgeProtocol = 'microsoft-edge:';
-        
-        // QQ链接模板 - 全部使用Edge协议
-        const qqLinks = {
-            chat: `${edgeProtocol}https://wpa.qq.com/msgrd?v=3&uin=${qqNumber}&site=qq&menu=yes`,
-            chatWithMsg: (message) => `${edgeProtocol}https://wpa.qq.com/msgrd?v=3&uin=${qqNumber}&site=qq&menu=yes&Msg=${encodeURIComponent(message)}`,
-            addFriend: `${edgeProtocol}tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=${qqNumber}`,
-            webQQ: `${edgeProtocol}https://im.qq.com/`
+        // 浏览器协议映射
+        const browserProtocols = {
+            chrome: 'googlechrome://',
+            edge: 'microsoft-edge:',
+            firefox: 'firefox://',
+            qq: 'qqbrowser://'
         };
         
-        // 页面加载时初始化
+        // QQ链接模板
+        const qqLinkTemplate = `https://wpa.qq.com/msgrd?v=3&uin=${qqNumber}&site=qq&menu=yes&Msg=你好，想和你一起玩游戏`;
+        
+        // 页面加载时初始化（移除自动协议检测，避免自动跳转）
         window.addEventListener('load', function() {
             // 页面加载动画
             setTimeout(function() {
@@ -638,14 +713,23 @@
             }
         }
         
-        // 使用Edge浏览器打开链接
-        function openWithBrowser() {
+        // 使用指定浏览器打开链接
+        function openWithBrowser(browser) {
+            if (!browserProtocols[browser]) return;
+            
             try {
-                // 使用Edge协议打开链接
-                const popup = window.open(qqLinks.chat, '_blank');
+                // 构建浏览器特定的链接格式
+                let url = '';
+                if (browser === 'chrome' || browser === 'edge') {
+                    url = `${browserProtocols[browser]}${qqLinkTemplate}`;
+                } else {
+                    url = qqLinkTemplate;
+                }
                 
+                // 尝试用指定浏览器打开（新窗口打开，避免原页面跳转）
+                const popup = window.open(url, '_blank');
                 if (popup && !popup.closed) {
-                    showProtocolIndicator('正在使用Edge浏览器打开链接');
+                    showProtocolIndicator(`正在使用${getBrowserName(browser)}打开链接`);
                     connectionAttempts = 0; // 重置尝试次数
                 } else {
                     // 仅在多次尝试后才显示失败提示
@@ -654,23 +738,34 @@
                         showModal(
                             'info',
                             '浏览器辅助',
-                            '建议检查Microsoft Edge是否正确安装并设置为默认浏览器'
+                            `建议直接下载${getBrowserName(browser)}或使用QQ客户端添加好友`
                         );
                     } else {
-                        showProtocolIndicator('尝试使用Edge浏览器打开', false);
+                        showProtocolIndicator(`尝试使用${getBrowserName(browser)}打开`, false);
                     }
                 }
             } catch (e) {
-                console.log('使用Edge打开失败', e);
+                console.log(`使用${getBrowserName(browser)}打开失败`, e);
                 connectionAttempts++;
                 if (connectionAttempts > 1) {
                     showModal(
                         'info',
                         '操作辅助',
-                        '可尝试手动打开Edge浏览器并访问QQ网页版'
+                        `可尝试网页版QQ或直接复制号码添加`
                     );
                 }
             }
+        }
+        
+        // 获取浏览器名称
+        function getBrowserName(browser) {
+            const names = {
+                chrome: 'Google Chrome',
+                edge: 'Microsoft Edge',
+                firefox: 'Mozilla Firefox',
+                qq: 'QQ浏览器'
+            };
+            return names[browser] || browser;
         }
         
         // 显示协议测试指示器
@@ -685,7 +780,125 @@
             }, 2000);
         }
         
-        // 打开联系弹窗
+        // 测试所有协议连接（手动触发，不自动执行）
+        function testAllProtocols(showDetails = false) {
+            connectionStatus.textContent = '检测中...';
+            connectionStatus.className = 'text-xs px-2 py-1 bg-warning/20 text-warning rounded-full';
+            connectionProgressBar.style.width = '0%';
+            
+            const protocols = [
+                {
+                    name: '腾讯官方协议',
+                    url: `https://wpa.qq.com/msgrd?v=3&uin=${qqNumber}&site=qq&menu=yes`
+                },
+                {
+                    name: 'QQ本地协议1',
+                    url: `tencent://message/?uin=${qqNumber}&Site=&Menu=yes`
+                },
+                {
+                    name: 'QQ本地协议2',
+                    url: `mqq://im/chat?chat_type=wpa&uin=${qqNumber}&version=1`
+                },
+                {
+                    name: 'QQ添加好友协议',
+                    url: `tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=${qqNumber}`
+                }
+            ];
+            
+            // 重置最佳协议
+            bestProtocol = null;
+            
+            // 更新进度条
+            function updateProgress(percent) {
+                connectionProgressBar.style.width = `${percent}%`;
+            }
+            
+            // 创建隐藏的iframe来测试协议是否有效
+            function testProtocol(index) {
+                return new Promise((resolve) => {
+                    if (index >= protocols.length) {
+                        resolve();
+                        return;
+                    }
+                    
+                    if (showDetails) {
+                        showProtocolIndicator(`测试: ${protocols[index].name}`);
+                    }
+                    
+                    // 更新进度
+                    updateProgress((index / protocols.length) * 100);
+                    
+                    const iframe = document.createElement('iframe');
+                    iframe.style.display = 'none';
+                    iframe.src = protocols[index].url;
+                    document.body.appendChild(iframe);
+                    
+                    // 协议有效检测
+                    let isProtocolValid = false;
+                    
+                    // 设置超时时间
+                    const timeout = setTimeout(() => {
+                        cleanup();
+                    }, 2000);
+                    
+                    // 对于HTTP协议，尝试检测是否能访问
+                    if (protocols[index].url.startsWith('http')) {
+                        const xhr = new XMLHttpRequest();
+                        xhr.open('HEAD', protocols[index].url, true);
+                        xhr.timeout = 1500;
+                        xhr.onload = function() {
+                            clearTimeout(timeout);
+                            isProtocolValid = xhr.status < 400;
+                            if (isProtocolValid && !bestProtocol) {
+                                bestProtocol = protocols[index];
+                            }
+                            cleanup();
+                        };
+                        xhr.ontimeout = xhr.onerror = function() {
+                            clearTimeout(timeout);
+                            cleanup();
+                        };
+                        xhr.send();
+                    } else {
+                        // 本地协议无法通过XHR检测，设置超时后默认有效
+                        setTimeout(() => {
+                            clearTimeout(timeout);
+                            isProtocolValid = true;
+                            if (!bestProtocol) {
+                                bestProtocol = protocols[index];
+                            }
+                            cleanup();
+                        }, 1500);
+                    }
+                    
+                    function cleanup() {
+                        document.body.removeChild(iframe);
+                        testProtocol(index + 1).then(resolve);
+                    }
+                });
+            }
+            
+            // 开始测试所有协议
+            testProtocol(0).then(() => {
+                updateProgress(100);
+                
+                if (bestProtocol) {
+                    connectionStatus.textContent = `最佳: ${bestProtocol.name}`;
+                    connectionStatus.className = 'text-xs px-2 py-1 bg-success/20 text-success rounded-full';
+                    if (showDetails) {
+                        showProtocolIndicator(`检测完成，最佳连接方式: ${bestProtocol.name}`);
+                    }
+                } else {
+                    connectionStatus.textContent = '建议使用QQ客户端';
+                    connectionStatus.className = 'text-xs px-2 py-1 bg-warning/20 text-warning rounded-full';
+                    if (showDetails) {
+                        showProtocolIndicator('已准备好备用连接方案', false);
+                    }
+                }
+            });
+        }
+        
+        // 打开联系弹窗（移除自动触发操作，避免自动跳转）
         function openContactModal(purpose = '') {
             contactModal.classList.remove('hidden');
             contactModal.classList.add('animate-fade-in');
@@ -695,11 +908,11 @@
                 toggleAllProtocols();
             }
             
-            // 根据目的显示相应内容，不自动跳转
+            // 仅显示提示，不自动触发跳转
             if (purpose === 'addFriend') {
-                showProtocolIndicator('请使用"添加好友"按钮发起连接');
+                showProtocolIndicator('请点击"添加好友"按钮发起连接');
             } else if (purpose === 'invite') {
-                showProtocolIndicator('请使用"快速发起会话"按钮发送邀请');
+                showProtocolIndicator('请选择连接方式发送邀请');
             }
         }
         
@@ -708,81 +921,156 @@
             contactModal.classList.add('hidden');
         }
         
-        // 尝试快速会话 - 使用Edge协议
-        function tryQuickChat() {
-            try {
-                // 使用Edge协议打开聊天链接
-                const popup = window.open(qqLinks.chat, '_blank');
-                
-                if (popup && !popup.closed) {
-                    showProtocolIndicator('正在通过Edge浏览器打开会话窗口');
-                    connectionAttempts = 0;
-                } else {
+        // 尝试快速会话 - 需手动点击触发
+        function tryQuickChat(useBestProtocol = false) {
+            // 准备多种协议，按优先级排序
+            const protocols = [
+                `https://wpa.qq.com/msgrd?v=3&uin=${qqNumber}&site=qq&menu=yes&Msg=你好，想和你一起玩游戏`,
+                `tencent://message/?uin=${qqNumber}&Site=&Menu=yes&Msg=你好，想和你一起玩游戏`,
+                `mqq://im/chat?chat_type=wpa&uin=${qqNumber}&version=1&msg=你好，想和你一起玩游戏`
+            ];
+            
+            // 如果有最佳协议且用户同意使用，则优先使用
+            let urls = protocols;
+            if (useBestProtocol && bestProtocol) {
+                urls = [bestProtocol.url + '&Msg=你好，想和你一起玩游戏'];
+                showProtocolIndicator(`正在连接...`);
+            }
+            
+            // 尝试打开链接，使用链式调用确保每个链接依次尝试
+            connectionAttempts = 0;
+            
+            function attemptConnection(urlIndex) {
+                if (urlIndex >= urls.length) {
+                    // 所有链接尝试完毕，提供替代方案
                     connectionAttempts++;
                     if (connectionAttempts > 1) {
                         showModal(
                             'info', 
                             '连接辅助', 
-                            '1. 确保Edge浏览器已安装\n2. 尝试手动打开Edge\n3. 在Edge中访问QQ网页版'
+                            '可通过以下方式联系：\n1. 复制QQ号添加好友\n2. 使用网页版QQ\n3. 访问QQ空间留言'
                         );
                     } else {
-                        showProtocolIndicator('会话窗口打开中...', false);
+                        showProtocolIndicator('请尝试其他连接方式', false);
                     }
+                    return;
                 }
-            } catch (e) {
-                console.log('快速会话失败', e);
-                showModal(
-                    'info', 
-                    '连接辅助', 
-                    '可通过QQ网页版发起会话:\nhttps://im.qq.com/'
-                );
+                
+                try {
+                    const popup = window.open(urls[urlIndex], '_blank');
+                    
+                    // 检查窗口是否成功打开
+                    const checkPopup = setInterval(() => {
+                        if (!popup || popup.closed) {
+                            clearInterval(checkPopup);
+                            // 窗口关闭或未能打开，尝试下一个链接
+                            attemptConnection(urlIndex + 1);
+                        } else {
+                            clearInterval(checkPopup);
+                            showProtocolIndicator('连接成功');
+                            connectionAttempts = 0; // 重置尝试次数
+                        }
+                    }, 1000);
+                    
+                    // 设置超时，防止无限等待
+                    setTimeout(() => {
+                        clearInterval(checkPopup);
+                        if (popup && !popup.closed) {
+                            showProtocolIndicator('连接成功');
+                            connectionAttempts = 0;
+                        } else {
+                            attemptConnection(urlIndex + 1);
+                        }
+                    }, 3000);
+                    
+                } catch (e) {
+                    console.log(`协议尝试失败: ${urls[urlIndex]}`, e);
+                    attemptConnection(urlIndex + 1);
+                }
             }
+            
+            // 开始尝试连接
+            attemptConnection(0);
         }
         
-        // 尝试添加好友 - 使用Edge协议
-        function tryAddFriend() {
-            try {
-                // 使用Edge协议打开添加好友链接
-                const popup = window.open(qqLinks.addFriend, '_blank');
-                
-                if (popup && !popup.closed) {
-                    showProtocolIndicator('正在通过Edge浏览器打开添加好友窗口');
-                    connectionAttempts = 0;
-                } else {
+        // 尝试添加好友 - 需手动点击触发
+        function tryAddFriend(useBestProtocol = false) {
+            const protocols = [
+                `tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=${qqNumber}`,
+                `https://wpa.qq.com/msgrd?v=3&uin=${qqNumber}&site=qq&menu=yes&action=addfriend`
+            ];
+            
+            // 如果有最佳协议且用户同意使用，则优先使用
+            let urls = protocols;
+            if (useBestProtocol && bestProtocol && bestProtocol.url.includes('AddContact')) {
+                urls = [bestProtocol.url];
+                showProtocolIndicator(`正在连接...`);
+            }
+            
+            // 尝试打开链接
+            connectionAttempts = 0;
+            
+            function attemptConnection(urlIndex) {
+                if (urlIndex >= urls.length) {
                     connectionAttempts++;
                     if (connectionAttempts > 1) {
                         showModal(
                             'info', 
                             '添加好友辅助', 
-                            '1. 复制QQ号：3272927512\n2. 打开Edge浏览器\n3. 访问QQ网页版添加好友'
+                            '1. 复制QQ号：3272927512\n2. 打开QQ客户端\n3. 搜索并添加好友'
                         );
                     } else {
-                        showProtocolIndicator('添加好友窗口打开中...', false);
+                        showProtocolIndicator('请尝试手动添加好友', false);
                     }
+                    return;
                 }
-            } catch (e) {
-                console.log('添加好友失败', e);
-                showModal(
-                    'info', 
-                    '添加好友辅助', 
-                    'QQ号：3272927512\n可在Edge浏览器中访问QQ网页版添加'
-                );
+                
+                try {
+                    const popup = window.open(urls[urlIndex], '_blank');
+                    
+                    const checkPopup = setInterval(() => {
+                        if (!popup || popup.closed) {
+                            clearInterval(checkPopup);
+                            attemptConnection(urlIndex + 1);
+                        } else {
+                            clearInterval(checkPopup);
+                            showProtocolIndicator('添加好友窗口已打开');
+                            connectionAttempts = 0;
+                        }
+                    }, 1000);
+                    
+                    setTimeout(() => {
+                        clearInterval(checkPopup);
+                        if (popup && !popup.closed) {
+                            showProtocolIndicator('添加好友窗口已打开');
+                            connectionAttempts = 0;
+                        } else {
+                            attemptConnection(urlIndex + 1);
+                        }
+                    }, 3000);
+                    
+                } catch (e) {
+                    console.log(`协议尝试失败: ${urls[urlIndex]}`, e);
+                    attemptConnection(urlIndex + 1);
+                }
             }
+            
+            attemptConnection(0);
         }
         
-        // 显示游戏邀请信息，不自动跳转
+        // 显示游戏邀请信息（不自动跳转，需手动触发）
         function showGameInvitation(gameName) {
-            const message = `来玩${gameName}吧`;
+            currentGameMessage = `来玩${gameName}吧`;
             showModal(
                 'info',
                 '游戏邀请',
-                `邀请消息: "${message}"\n\n点击"用Edge打开"按钮发送`
+                `邀请消息: "${currentGameMessage}"\n\n点击"打开QQ"按钮发送`
             );
             
-            // 重写模态框的"用Edge打开"按钮功能
+            // 重写模态框的"打开QQ"按钮功能
             const openButton = resultModal.querySelector('button:last-child');
             openButton.onclick = function() {
-                closeModal(true, message);
+                closeModal(true);
             };
         }
         
@@ -834,19 +1122,21 @@
         }
         
         // 关闭提示弹窗
-        function closeModal(openEdge = false, message = '你好，想和你一起玩游戏') {
+        function closeModal(openQQ = false) {
             resultModal.classList.add('hidden');
             
-            // 如果需要，尝试用Edge打开
-            if (openEdge) {
+            // 如果需要，尝试打开QQ（需手动确认）
+            if (openQQ && currentGameMessage) {
+                const encodedMsg = encodeURIComponent(currentGameMessage);
+                const url = `https://wpa.qq.com/msgrd?v=3&uin=${qqNumber}&site=qq&menu=yes&Msg=${encodedMsg}`;
                 try {
-                    // 使用带消息的链接
-                    window.open(qqLinks.chatWithMsg(message), '_blank');
-                    showProtocolIndicator('正在通过Edge浏览器发送消息');
+                    window.open(url, '_blank');
+                    showProtocolIndicator('正在打开邀请窗口');
                 } catch (e) {
-                    console.log('打开Edge失败', e);
-                    showProtocolIndicator('请手动打开Edge浏览器发送消息', false);
+                    console.log('打开QQ失败', e);
+                    showProtocolIndicator('请手动发送邀请', false);
                 }
+                currentGameMessage = '';
             }
         }
         
