@@ -326,7 +326,7 @@
                                         <span>我的世界</span>
                                         <span>
                                             99%
-                                            <button onclick="sendGameMessage('来玩我的世界')" class="ml-1 text-accent hover:underline cursor-pointer">
+                                            <button onclick="sendGameMessage('来玩MC')" class="ml-1 text-accent hover:underline cursor-pointer">
                                                 <i class="fa fa-comment"></i>
                                             </button>
                                         </span>
@@ -354,7 +354,7 @@
                                         <span>求生之路2</span>
                                         <span>
                                             70%
-                                            <button onclick="sendGameMessage('来玩求生之路2')" class="ml-1 text-accent hover:underline cursor-pointer">
+                                            <button onclick="sendGameMessage('来玩求2')" class="ml-1 text-accent hover:underline cursor-pointer">
                                                 <i class="fa fa-comment"></i>
                                             </button>
                                         </span>
@@ -403,7 +403,7 @@
                                         <span>逃生：试炼</span>
                                         <span>
                                             30%
-                                            <button onclick="sendGameMessage('来玩逃生：试炼')" class="ml-1 text-accent hover:underline cursor-pointer">
+                                            <button onclick="sendGameMessage('来玩逃生试炼')" class="ml-1 text-accent hover:underline cursor-pointer">
                                                 <i class="fa fa-comment"></i>
                                             </button>
                                         </span>
@@ -429,13 +429,13 @@
                     <div class="space-y-6">
                         <div class="relative pl-6 border-l-2 border-gray-700 before:absolute before:left-[-9px] before:top-0 before:w-4 before:h-4 before:rounded-full before:bg-accent">
                             <h3 class="text-lg font-medium">服务器管理员 | 我的世界社区</h3>
-                            <p class="text-gray-400 mb-2">2020年 - 至今</p>
+                            <p class="text-gray-400 mb-2">2007年 - 至今</p>
                             <p class="text-gray-300">负责游戏服务器日常维护，创建友好游戏环境，解决玩家问题，组织线上活动。</p>
                         </div>
                         
                         <div class="relative pl-6 border-l-2 border-gray-700 before:absolute before:left-[-9px] before:top-0 before:w-4 before:h-4 before:rounded-full before:bg-accent">
                             <h3 class="text-lg font-medium">游戏测评员 | 游戏论坛</h3>
-                            <p class="text-gray-400 mb-2">2018年 - 2020年</p>
+                            <p class="text-gray-400 mb-2">2007年 - 2025年</p>
                             <p class="text-gray-300">参与多款游戏测试，撰写测评报告，提供游戏体验优化建议。</p>
                         </div>
                     </div>
@@ -474,7 +474,7 @@
             if (purpose === 'addFriend') {
                 setTimeout(tryAddFriend, 500);
             } else if (purpose === 'invite') {
-                setTimeout(() => sendGameMessage('来一起玩游戏吧'), 500);
+                setTimeout(() => sendGameMessage('来玩游戏'), 500);
             }
         }
         
@@ -487,8 +487,8 @@
         function tryQuickChat() {
             // 尝试多种协议，提高成功率
             const urls = [
-                `tencent://message/?uin=${qqNumber}&Site=&Menu=yes&Msg=你好，想和你一起玩游戏`,
-                `https://wpa.qq.com/msgrd?v=3&uin=${qqNumber}&site=qq&menu=yes&Msg=你好，想和你一起玩游戏`
+                `tencent://message/?uin=${qqNumber}&Site=&Menu=yes&Msg=你好，一起玩吗`,
+                `https://wpa.qq.com/msgrd?v=3&uin=${qqNumber}&site=qq&menu=yes&Msg=你好，一起玩吗`
             ];
             
             // 尝试打开第一个链接
@@ -647,3 +647,4 @@
     </script>
 </body>
 </html>
+
